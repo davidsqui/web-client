@@ -1,0 +1,25 @@
+package com.dasc.webclient.client;
+
+import com.dasc.webclient.domain.Beer;
+import com.dasc.webclient.domain.BeerPagedList;
+import java.util.UUID;
+import org.springframework.http.ResponseEntity;
+import reactor.core.publisher.Mono;
+
+public interface BeerClient {
+
+  Mono<BeerPagedList> getAllBeers(Integer pageNumber, Integer pageSize, String beerName,
+      String beerStyle, Boolean showInventoryOnHand);
+
+  Mono<Beer> getBeerById(UUID id);
+
+  Mono<Beer> getBeerByUPC(String upc);
+
+  Mono<ResponseEntity> createBeer(Beer beer);
+
+  Mono<ResponseEntity> updateBeer(UUID id, Beer beer);
+
+  Mono<ResponseEntity> deleteBeer(UUID id);
+
+
+}
