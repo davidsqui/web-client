@@ -97,4 +97,24 @@ class BeerClientImplTest {
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
   }
 
+  @Test
+  void updateBeer() {
+    Mono<BeerPagedList> beerPagedListMono = beerClient.getAllBeers(1, 1, null, null, true);
+    BeerPagedList beerPagedList = beerPagedListMono.block();
+    Beer beerToFind = Objects.requireNonNull(beerPagedList).getContent().get(0);
+
+    Beer newBeer = Beer.builder()
+       .beerName("Update Test Beer")
+       .beerStyle(BeerStyle.IPA)
+       .upc("1234567890")
+       .price(new BigDecimal("10.99"))
+       .build();
+
+    Mono<ResponseEntity<Void>> responseEntityMono = beerClient.updateBeer(beerToFind.getId(), newBeer);
+    ResponseEntity responseEntity = responseEntityMono.block();
+
+    assertThat(responseEntity).isNotNull();
+    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+  }
+
 }

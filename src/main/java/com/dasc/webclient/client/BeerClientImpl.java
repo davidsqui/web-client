@@ -64,8 +64,13 @@ public class BeerClientImpl implements BeerClient {
   }
 
   @Override
-  public Mono<ResponseEntity> updateBeer(UUID id, Beer beer) {
-    return null;
+  public Mono<ResponseEntity<Void>> updateBeer(UUID id, Beer beer) {
+    return webClient.put()
+        .uri(uriBuilder -> uriBuilder.path(WebClientProperties.BEER_v1_PATH_GET_BY_ID).build(id))
+        .body(BodyInserters.fromValue(beer))
+        .retrieve()
+        .toBodilessEntity()
+        .log();
   }
 
   @Override
