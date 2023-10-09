@@ -15,7 +15,7 @@ public interface BeerClient {
 
   Mono<Beer> getBeerByUPC(String upc, Boolean showInventoryOnHand);
 
-  Mono<ResponseEntity> createBeer(Beer beer);
+  Mono<ResponseEntity<Void>> createBeer(Beer beer);
 
   Mono<ResponseEntity> updateBeer(UUID id, Beer beer);
 

@@ -5,9 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.dasc.webclient.config.WebClientConfig;
 import com.dasc.webclient.domain.Beer;
 import com.dasc.webclient.domain.BeerPagedList;
+import com.dasc.webclient.domain.BeerStyle;
+import java.math.BigDecimal;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 class BeerClientImplTest {
@@ -74,6 +78,23 @@ class BeerClientImplTest {
 
     assertThat(foundBeer).isNotNull();
     assertThat(foundBeer.getUpc()).isEqualTo(beerToFind.getUpc());
+  }
+
+  @Test
+  void createBeer() {
+    Beer newBeer = Beer.builder()
+        .beerName("Test Beer")
+        .beerStyle(BeerStyle.IPA)
+        .upc("1234567890")
+        .price(new BigDecimal("10.99"))
+        .build();
+
+    Mono<ResponseEntity<Void>> responseEntityMono = beerClient.createBeer(newBeer);
+
+    ResponseEntity responseEntity = responseEntityMono.block();
+
+    assertThat(responseEntity).isNotNull();
+    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
   }
 
 }
