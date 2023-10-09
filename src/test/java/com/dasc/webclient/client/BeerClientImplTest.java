@@ -10,6 +10,8 @@ import com.dasc.webclient.domain.BeerStyle;
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -157,6 +159,25 @@ class BeerClientImplTest {
         }).block();
 
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+  }
+
+  @Test
+  void functionalTestGetBeerById() throws InterruptedException {
+    AtomicReference<UUID> uuid = new AtomicReference<>();
+    CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    beerClient.getAllBeers(null, null, null, null, null)
+        .map(beerPagedList -> beerPagedList.getContent().get(0).getId())
+        .map(beerId -> beerClient.getBeerById(beerId, false))
+        .flatMap(mono -> mono)
+        .subscribe(beer -> {
+          System.out.println(beer.getId());
+          uuid.set(beer.getId());
+          countDownLatch.countDown();
+        });
+//    Thread.sleep(3000);
+    countDownLatch.await();
+    assertThat(uuid).isNotNull();
   }
 
 }
