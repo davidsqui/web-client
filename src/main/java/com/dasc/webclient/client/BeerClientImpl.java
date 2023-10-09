@@ -69,12 +69,14 @@ public class BeerClientImpl implements BeerClient {
         .uri(uriBuilder -> uriBuilder.path(WebClientProperties.BEER_v1_PATH_GET_BY_ID).build(id))
         .body(BodyInserters.fromValue(beer))
         .retrieve()
-        .toBodilessEntity()
-        .log();
+        .toBodilessEntity();
   }
 
   @Override
-  public Mono<ResponseEntity> deleteBeer(UUID id) {
-    return null;
+  public Mono<ResponseEntity<Void>> deleteBeer(UUID id) {
+    return webClient.delete()
+        .uri(uriBuilder -> uriBuilder.path(WebClientProperties.BEER_v1_PATH_GET_BY_ID).build(id))
+        .retrieve()
+        .toBodilessEntity();
   }
 }
