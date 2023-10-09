@@ -11,9 +11,9 @@ public interface BeerClient {
   Mono<BeerPagedList> getAllBeers(Integer pageNumber, Integer pageSize, String beerName,
       String beerStyle, Boolean showInventoryOnHand);
 
-  Mono<Beer> getBeerById(UUID id);
+  Mono<Beer> getBeerById(UUID id, Boolean showInventoryOnHand);
 
-  Mono<Beer> getBeerByUPC(String upc);
+  Mono<Beer> getBeerByUPC(String upc, Boolean showInventoryOnHand);
 
   Mono<ResponseEntity> createBeer(Beer beer);
 
