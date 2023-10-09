@@ -1,6 +1,7 @@
 package com.dasc.webclient.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.dasc.webclient.config.WebClientConfig;
 import com.dasc.webclient.domain.Beer;
@@ -8,10 +9,12 @@ import com.dasc.webclient.domain.BeerPagedList;
 import com.dasc.webclient.domain.BeerStyle;
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 class BeerClientImplTest {
@@ -104,13 +107,14 @@ class BeerClientImplTest {
     Beer beerToFind = Objects.requireNonNull(beerPagedList).getContent().get(0);
 
     Beer newBeer = Beer.builder()
-       .beerName("Update Test Beer")
-       .beerStyle(BeerStyle.IPA)
-       .upc("1234567890")
-       .price(new BigDecimal("10.99"))
-       .build();
+        .beerName("Update Test Beer")
+        .beerStyle(BeerStyle.IPA)
+        .upc("1234567890")
+        .price(new BigDecimal("10.99"))
+        .build();
 
-    Mono<ResponseEntity<Void>> responseEntityMono = beerClient.updateBeer(beerToFind.getId(), newBeer);
+    Mono<ResponseEntity<Void>> responseEntityMono = beerClient.updateBeer(beerToFind.getId(),
+        newBeer);
     ResponseEntity responseEntity = responseEntityMono.block();
 
     assertThat(responseEntity).isNotNull();
@@ -128,6 +132,31 @@ class BeerClientImplTest {
 
     assertThat(responseEntity).isNotNull();
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+  }
+
+  @Test
+  void deleteBeerNotFound() {
+    Mono<ResponseEntity<Void>> responseEntityMono = beerClient.deleteBeer(UUID.randomUUID());
+    assertThrows(WebClientResponseException.class, () -> {
+      ResponseEntity<Void> responseEntity = responseEntityMono.block();
+      assertThat(responseEntity).isNotNull();
+      assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    });
+  }
+
+  @Test
+  void deleteBeerHandleException() {
+    Mono<ResponseEntity<Void>> responseEntityMono = beerClient.deleteBeer(UUID.randomUUID());
+    ResponseEntity<Void> responseEntity = responseEntityMono
+        .onErrorResume(throwable -> {
+          if (throwable instanceof WebClientResponseException exception) {
+            return Mono.just(ResponseEntity.status(exception.getStatusCode()).build());
+          } else {
+            throw new RuntimeException(throwable);
+          }
+        }).block();
+
+    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }
 
 }
